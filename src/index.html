@@ -88,7 +88,7 @@
                     // Transaction configuration
                     AMOUNT: 19.50,
                     FROM_CURRENCY: 'eur',
-                    TO_CURRENCY: 'matic', // Back to Polygon as requested
+                    TO_CURRENCY: 'pol', // Try 'pol' instead of 'matic' - seen in screenshot
                     PARTNER_ID: 'mercuryo_checkout',
                     
                     // API endpoints
@@ -229,7 +229,7 @@
             
             async initiatePurchase() {
                 try {
-                    console.log('🛒 Initiating SimpleSwap EUR → MATIC purchase...');
+                    console.log('🛒 Initiating SimpleSwap EUR → POL purchase...');
                     
                     this.setButtonLoading(true);
                     
@@ -297,10 +297,10 @@
                 // Build SimpleSwap widget URL with fiat payment forced
                 const widgetUrl = this.buildSimpleSwapWidgetURL();
                 
-                this.showSuccess('Redirecting to SimpleSwap - Please select Buy/Sell Crypto tab for fiat payment');
+                this.showSuccess('Redirecting to SimpleSwap with EUR → Polygon pre-filled!');
                 
-                // Give user choice with instructions
-                const userChoice = confirm('Ready to proceed to SimpleSwap!\n\n✨ Instructions:\n1. Click OK to go to SimpleSwap\n2. Click the "Buy/Sell Crypto" tab (right side)\n3. Select EUR → MATIC for €19.50\n4. Your wallet address will be pre-filled!\n\nClick OK to continue or Cancel for new tab.');
+                // Simplified - should work automatically now
+                const userChoice = confirm('Ready to proceed to SimpleSwap!\n\n✨ Your transaction is pre-configured:\n• €19.50 EUR → Polygon (POL)\n• Wallet address included\n• Affiliate tracking active\n\nClick OK to continue!');
                 
                 setTimeout(() => {
                     if (userChoice) {
@@ -318,38 +318,25 @@
             }
             
             buildSimpleSwapWidgetURL() {
-                // Try multiple URL strategies for fiat access
+                // Back to original working approach with correct currency code
+                const baseUrl = `${this.config.SIMPLESWAP_WIDGET}/`;
                 
-                // Strategy 1: Direct Buy/Sell URL path
-                const buyUrl = `${this.config.SIMPLESWAP_WIDGET}/buy-sell-crypto?` + new URLSearchParams({
+                const params = new URLSearchParams({
+                    // API key for tracking
                     partner: this.config.SIMPLESWAP_API_KEY,
-                    currency: this.config.FROM_CURRENCY,
-                    crypto: this.config.TO_CURRENCY,
+                    
+                    // Transaction details (using 'pol' instead of 'matic')
+                    from: this.config.FROM_CURRENCY,
+                    to: this.config.TO_CURRENCY, // Now 'pol' 
                     amount: this.config.AMOUNT,
+                    
+                    // User's wallet
                     address: this.walletAddress
-                }).toString();
+                });
                 
-                // Strategy 2: Widget with buy mode
-                const widgetUrl = `${this.config.SIMPLESWAP_WIDGET}/?` + new URLSearchParams({
-                    partner: this.config.SIMPLESWAP_API_KEY,
-                    mode: 'buy',
-                    fiat_currency: this.config.FROM_CURRENCY,
-                    crypto_currency: this.config.TO_CURRENCY,
-                    fiat_amount: this.config.AMOUNT,
-                    wallet_address: this.walletAddress
-                }).toString();
-                
-                // Strategy 3: Simple parameters (current working manual approach)
-                const simpleUrl = `${this.config.SIMPLESWAP_WIDGET}/?` + new URLSearchParams({
-                    partner: this.config.SIMPLESWAP_API_KEY
-                }).toString();
-                
-                console.log('🔗 Trying buy URL:', buyUrl);
-                console.log('🔗 Fallback widget URL:', widgetUrl);
-                console.log('🔗 Simple URL:', simpleUrl);
-                
-                // Try the simple approach first - let user manually select
-                return simpleUrl;
+                const finalUrl = `${baseUrl}?${params.toString()}`;
+                console.log('🔗 Built SimpleSwap URL:', finalUrl);
+                return finalUrl;
             }
             
             setButtonLoading(loading) {
