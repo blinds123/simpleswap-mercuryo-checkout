@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Secure cryptocurrency purchase with Mercuryo - €19.50 EUR to Bitcoin">
+    <title>Crypto Checkout - €19.50 EUR to Bitcoin</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loadingScreen" class="loading-screen">
+        <div class="spinner"></div>
+        <p>Initializing secure checkout...</p>
+    </div>
+    
+    <!-- Main Application -->
+    <div id="app" class="app-container" style="display: none;">
+        <div class="checkout-container">
+            <!-- Header -->
+            <header class="checkout-header">
+                <h1>Secure Crypto Purchase</h1>
+                <div class="security-badge">🔒 SSL Secured</div>
+            </header>
+            
+            <!-- Amount Display -->
+            <div class="amount-section">
+                <div class="amount-display" id="amountDisplay">€19.50</div>
+                <div class="amount-subtitle">Fixed Amount</div>
+            </div>
+            
+            <!-- Payment Method -->
+            <div class="payment-method-section">
+                <div class="payment-method active" id="paymentMethod">
+                    <span class="checkmark">✓</span>
+                    <span class="provider-name">Mercuryo</span>
+                    <span class="provider-badge">Recommended</span>
+                </div>
+            </div>
+            
+            <!-- Region Information -->
+            <div class="region-info" id="regionInfo">
+                <span class="region-icon">🌍</span>
+                <span class="region-text">Detecting your location...</span>
+            </div>
+            
+            <!-- Wallet Address Input -->
+            <div class="wallet-section">
+                <label for="walletInput">Your Bitcoin Address:</label>
+                <input type="text" id="walletInput" placeholder="Enter your BTC wallet address (e.g., 1A1zP1eP...)" class="wallet-input">
+                <div class="wallet-validation" id="walletValidation"></div>
+                <div class="wallet-help">
+                    <small>💡 Don't have a wallet? Try <a href="https://electrum.org/" target="_blank">Electrum</a> or <a href="https://exodus.com/" target="_blank">Exodus</a></small>
+                </div>
+            </div>
+            
+            <!-- Buy Button -->
+            <button class="buy-button" id="buyButton" disabled>
+                <span class="button-text">Buy Crypto</span>
+                <span class="button-loader" id="buttonLoader" style="display: none;">Opening secure payment...</span>
+            </button>
+            
+            <!-- Status Messages -->
+            <div class="status-messages">
+                <div class="success-message" id="successMessage"></div>
+                <div class="error-message" id="errorMessage"></div>
+                <div class="warning-message" id="warningMessage"></div>
+            </div>
+            
+            <!-- Footer -->
+            <footer class="checkout-footer">
+                <div class="powered-by">
+                    Powered by <strong>Mercuryo</strong>
+                </div>
+                <div class="security-info">
+                    <span>🔐 Bank-grade security</span>
+                    <span>⚡ Instant processing</span>
+                    <span>🌍 Available in 170+ countries</span>
+                </div>
+            </footer>
+        </div>
+    </div>
+    
+    <script>
+        // Final Production Checkout - Pure Mercuryo with Affiliate Tracking
+        class CryptoCheckout {
+            constructor() {
+                this.config = {
+                    // Your SimpleSwap affiliate ID for tracking/attribution
+                    AFFILIATE_ID: '678f89b3-e398-45a6-a9f6-091863527d0a',
+                    
+                    // Fixed transaction details
+                    AMOUNT: 19.50,
+                    CURRENCY: 'EUR',
+                    CRYPTO_CURRENCY: 'BTC',
+                    
+                    // Regional compliance
+                    SUPPORTED_COUNTRIES: ['AU', 'CA', 'US'],
+                    RESTRICTED_US_STATES: ['NY', 'HI', 'LA'],
+                    
+                    // Mercuryo endpoints
+                    MERCURYO_WIDGET: 'https://exchange.mercuryo.io',
+                    MERCURYO_SANDBOX: 'https://sandbox-exchange.mrcr.io'
+                };
+                
+                this.userLocation = null;
+                this.walletAddress = '';
+                this.isProduction = window.location.hostname !== 'localhost';
+            }
+            
+            async initialize() {
+                try {
+                    console.log('🚀 Initializing Crypto Checkout...');
+                    console.log('💡 Affiliate ID:', this.config.AFFILIATE_ID);
+                    
+                    // Detect user location first
+                    await this.detectLocation();
+                    
+                    // Setup all UI interactions
+                    this.setupEventListeners();
+                    
+                    // Show the main app
+                    this.showApp();
+                    
+                    console.log('✅ Crypto Checkout initialized successfully');
+                    
+                } catch (error) {
+                    console.error('❌ Initialization failed:', error);
+                    this.showError('Failed to initialize checkout. Please refresh and try again.');
+                }
+            }
+            
+            async detectLocation() {
+                try {
+                    console.log('📍 Detecting location...');
+                    
+                    const response = await fetch('https://ipapi.co/json/', { timeout: 5000 });
+                    const data = await response.json();
+                    
+                    this.userLocation = {
+                        country: data.country_code,
+                        region: data.region_code,
+                        city: data.city,
+                        ip: data.ip
+                    };
+                    
+                    console.log('📍 Location detected:', this.userLocation);
+                    this.validateRegionAccess();
+                    
+                } catch (error) {
+                    console.warn('⚠️ Location detection failed:', error);
+                    this.userLocation = { country: 'UNKNOWN' };
+                    this.updateRegionDisplay('Location detection failed - Proceeding with checkout', '🌍');
+                }
+            }
+            
+            validateRegionAccess() {
+                const country = this.userLocation?.country;
+                
+                if (!country || country === 'UNKNOWN') {
+                    this.updateRegionDisplay('Location unknown - Proceeding with checkout', '🌍');
+                    return true;
+                }
+                
+                // Check supported countries
+                if (!this.config.SUPPORTED_COUNTRIES.includes(country)) {
+                    this.updateRegionDisplay('Service not available in your region', '❌');
+                    this.showError(`Mercuryo is currently only available in Australia, Canada, and USA. Your location: ${country}`);
+                    return false;
+                }
+                
+                // Check US state restrictions
+                if (country === 'US' && this.config.RESTRICTED_US_STATES.includes(this.userLocation.region)) {
+                    this.updateRegionDisplay(`Not available in ${this.userLocation.region}`, '❌');
+                    this.showError(`Mercuryo is not available in ${this.userLocation.region} due to local regulations.`);
+                    return false;
+                }
+                
+                // Success - show availability
+                const countryNames = { AU: 'Australia', CA: 'Canada', US: 'United States' };
+                this.updateRegionDisplay(`Available in ${countryNames[country]}`, '✅');
+                return true;
+            }
+            
+            updateRegionDisplay(text, icon) {
+                const regionInfo = document.getElementById('regionInfo');
+                regionInfo.innerHTML = `<span class="region-icon">${icon}</span><span class="region-text">${text}</span>`;
+            }
+            
+            setupEventListeners() {
+                const walletInput = document.getElementById('walletInput');
+                const buyButton = document.getElementById('buyButton');
+                
+                // Real-time wallet validation
+                walletInput.addEventListener('input', (e) => {
+                    this.walletAddress = e.target.value.trim();
+                    this.validateWalletAddress();
+                });
+                
+                // Buy button action
+                buyButton.addEventListener('click', () => {
+                    this.initiatePurchase();
+                });
+                
+                // Handle paste events
+                walletInput.addEventListener('paste', (e) => {
+                    setTimeout(() => {
+                        this.walletAddress = e.target.value.trim();
+                        this.validateWalletAddress();
+                    }, 100);
+                });
+            }
+            
+            validateWalletAddress() {
+                const validation = document.getElementById('walletValidation');
+                const buyButton = document.getElementById('buyButton');
+                
+                if (!this.walletAddress) {
+                    validation.innerHTML = '';
+                    buyButton.disabled = true;
+                    return false;
+                }
+                
+                // Comprehensive Bitcoin address validation
+                const patterns = {
+                    legacy: /^[13][a-km-zA-HJ-NP-Z1-9]{25,34}$/, // Legacy addresses (1...)
+                    segwit: /^3[a-km-zA-HJ-NP-Z1-9]{25,34}$/, // SegWit addresses (3...)
+                    bech32: /^bc1[a-z0-9]{39,59}$/, // Native SegWit (bc1...)
+                    testnet: /^[2mn][a-km-zA-HJ-NP-Z1-9]{25,34}$|^tb1[a-z0-9]{39,59}$/ // Testnet
+                };
+                
+                let isValid = false;
+                let addressType = '';
+                
+                if (patterns.legacy.test(this.walletAddress)) {
+                    isValid = true;
+                    addressType = 'Legacy P2PKH';
+                } else if (patterns.segwit.test(this.walletAddress)) {
+                    isValid = true;
+                    addressType = 'SegWit P2SH';
+                } else if (patterns.bech32.test(this.walletAddress)) {
+                    isValid = true;
+                    addressType = 'Native SegWit';
+                } else if (patterns.testnet.test(this.walletAddress)) {
+                    validation.innerHTML = '<span style="color: #f59e0b;">⚠️ Testnet address detected - Use mainnet address for real transactions</span>';
+                    buyButton.disabled = true;
+                    return false;
+                }
+                
+                if (isValid) {
+                    validation.innerHTML = `<span style="color: #10b981;">✓ Valid ${addressType} Bitcoin address</span>`;
+                    buyButton.disabled = false;
+                    return true;
+                } else {
+                    validation.innerHTML = '<span style="color: #dc2626;">❌ Invalid Bitcoin address format</span>';
+                    buyButton.disabled = true;
+                    return false;
+                }
+            }
+            
+            initiatePurchase() {
+                if (!this.validateWalletAddress()) {
+                    this.showError('Please enter a valid Bitcoin address before proceeding.');
+                    return;
+                }
+                
+                try {
+                    console.log('🛒 Initiating Mercuryo purchase...');
+                    console.log('💰 Amount:', this.config.AMOUNT, this.config.CURRENCY);
+                    console.log('🔑 Wallet:', this.walletAddress);
+                    
+                    // Show loading state
+                    this.setButtonLoading(true);
+                    
+                    // Build Mercuryo URL
+                    const mercuryoUrl = this.buildMercuryoURL();
+                    console.log('🔗 Mercuryo URL:', mercuryoUrl);
+                    
+                    // Show success message
+                    this.showSuccess('Opening secure Mercuryo payment window...');
+                    
+                    // Track the transaction attempt
+                    this.trackTransaction('initiated');
+                    
+                    // Open Mercuryo in new window
+                    setTimeout(() => {
+                        const popup = window.open(
+                            mercuryoUrl, 
+                            'mercuryo_checkout',
+                            'width=450,height=700,scrollbars=yes,resizable=yes,location=yes'
+                        );
+                        
+                        if (!popup) {
+                            this.showError('Popup blocked. Please allow popups and try again.');
+                            this.setButtonLoading(false);
+                        } else {
+                            console.log('✅ Mercuryo window opened successfully');
+                            this.setButtonLoading(false);
+                        }
+                    }, 1500);
+                    
+                } catch (error) {
+                    console.error('❌ Purchase failed:', error);
+                    this.showError('Failed to open payment window. Please try again.');
+                    this.setButtonLoading(false);
+                }
+            }
+            
+            buildMercuryoURL() {
+                // Use production Mercuryo endpoint
+                const baseUrl = this.config.MERCURYO_WIDGET;
+                
+                const params = new URLSearchParams({
+                    // Transaction details
+                    type: 'buy',
+                    amount: this.config.AMOUNT,
+                    currency: this.config.CURRENCY,
+                    crypto_currency: this.config.CRYPTO_CURRENCY,
+                    
+                    // User's wallet address
+                    address: this.walletAddress,
+                    
+                    // UI configuration
+                    theme: 'light',
+                    fix_amount: 'true',
+                    fix_currency: 'true',
+                    fix_crypto_currency: 'true',
+                    
+                    // Affiliate tracking (using your SimpleSwap ID for attribution)
+                    merchant_transaction_id: `affiliate_${this.config.AFFILIATE_ID}_${Date.now()}`,
+                    
+                    // Return handling
+                    return_url: window.location.href,
+                    
+                    // Additional tracking
+                    source: 'affiliate_checkout',
+                    partner_id: this.config.AFFILIATE_ID
+                });
+                
+                return `${baseUrl}?${params.toString()}`;
+            }
+            
+            trackTransaction(status) {
+                // Simple analytics tracking
+                const trackingData = {
+                    affiliate_id: this.config.AFFILIATE_ID,
+                    amount: this.config.AMOUNT,
+                    currency: this.config.CURRENCY,
+                    crypto_currency: this.config.CRYPTO_CURRENCY,
+                    wallet_address: this.walletAddress.substring(0, 10) + '...', // Partial for privacy
+                    status: status,
+                    timestamp: new Date().toISOString(),
+                    location: this.userLocation,
+                    user_agent: navigator.userAgent
+                };
+                
+                console.log('📊 Transaction tracking:', trackingData);
+                
+                // You could send this to your analytics service
+                // fetch('/api/track', { method: 'POST', body: JSON.stringify(trackingData) });
+            }
+            
+            setButtonLoading(loading) {
+                const buyButton = document.getElementById('buyButton');
+                const buttonText = buyButton.querySelector('.button-text');
+                const buttonLoader = document.getElementById('buttonLoader');
+                
+                if (loading) {
+                    buttonText.style.display = 'none';
+                    buttonLoader.style.display = 'flex';
+                    buyButton.disabled = true;
+                    buyButton.classList.add('loading');
+                } else {
+                    buttonText.style.display = 'inline';
+                    buttonLoader.style.display = 'none';
+                    buyButton.disabled = false;
+                    buyButton.classList.remove('loading');
+                }
+            }
+            
+            showApp() {
+                setTimeout(() => {
+                    document.getElementById('loadingScreen').style.display = 'none';
+                    const app = document.getElementById('app');
+                    app.style.display = 'flex';
+                    app.style.opacity = '1';
+                }, 1200);
+            }
+            
+            showError(message) {
+                const errorElement = document.getElementById('errorMessage');
+                errorElement.textContent = message;
+                errorElement.style.display = 'block';
+                
+                // Hide other messages
+                document.getElementById('successMessage').style.display = 'none';
+                document.getElementById('warningMessage').style.display = 'none';
+                
+                // Auto-hide after 10 seconds
+                setTimeout(() => {
+                    errorElement.style.display = 'none';
+                }, 10000);
+            }
+            
+            showSuccess(message) {
+                const successElement = document.getElementById('successMessage');
+                successElement.textContent = message;
+                successElement.style.display = 'block';
+                
+                // Hide other messages
+                document.getElementById('errorMessage').style.display = 'none';
+                document.getElementById('warningMessage').style.display = 'none';
+                
+                // Auto-hide after 5 seconds
+                setTimeout(() => {
+                    successElement.style.display = 'none';
+                }, 5000);
+            }
+        }
+        
+        // Initialize the checkout when page loads
+        document.addEventListener('DOMContentLoaded', async () => {
+            const checkout = new CryptoCheckout();
+            window.checkout = checkout; // For debugging
+            await checkout.initialize();
+        });
+        
+        // Handle window focus to check if user returned from Mercuryo
+        window.addEventListener('focus', () => {
+            if (window.checkout) {
+                console.log('👀 Window focused - user may have returned from payment');
+            }
+        });
+    </script>
+    
+    <style>
+        /* Enhanced wallet input styles */
+        .wallet-section {
+            margin-bottom: 24px;
+        }
+        
+        .wallet-section label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #374151;
+            font-size: 14px;
+        }
+        
+        .wallet-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 13px;
+            font-family: 'Courier New', monospace;
+            transition: all 0.2s ease;
+            box-sizing: border-box;
+            background: #fafafa;
+        }
+        
+        .wallet-input:focus {
+            outline: none;
+            border-color: #10b981;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+            background: white;
+        }
+        
+        .wallet-input::placeholder {
+            color: #9ca3af;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        
+        .wallet-validation {
+            margin-top: 8px;
+            font-size: 12px;
+            min-height: 18px;
+            font-weight: 500;
+        }
+        
+        .wallet-help {
+            margin-top: 6px;
+        }
+        
+        .wallet-help small {
+            color: #6b7280;
+            font-size: 11px;
+        }
+        
+        .wallet-help a {
+            color: #10b981;
+            text-decoration: none;
+        }
+        
+        .wallet-help a:hover {
+            text-decoration: underline;
+        }
+        
+        .buy-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        
+        .buy-button.loading {
+            pointer-events: none;
+        }
+        
+        .button-loader {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-weight: 600;
+        }
+        
+        @media (max-width: 480px) {
+            .wallet-input {
+                font-size: 12px;
+                padding: 12px 14px;
+            }
+            
+            .wallet-section label {
+                font-size: 13px;
+            }
+        }
+        
+        /* Loading animation enhancement */
+        .button-loader::before {
+            content: '';
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+    </style>
+</body>
+</html>

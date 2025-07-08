@@ -5,11 +5,11 @@
 
 // Production Environment Configuration
 const PRODUCTION_CONFIG = {
-    // API Configuration (Update these with your real API keys)
-    SIMPLESWAP_API_KEY: 'demo_api_key',
-    SIMPLESWAP_PARTNER_ID: 'demo_partner_id',
-    MERCURYO_WIDGET_ID: 'demo_widget_id',
-    MERCURYO_SIGN_KEY: 'demo_sign_key',
+    // API Configuration (Real API keys)
+    SIMPLESWAP_API_KEY: '678f89b3-e398-45a6-a9f6-091863527d0a',
+    SIMPLESWAP_PARTNER_ID: '678f89b3-e398-45a6-a9f6-091863527d0a',
+    MERCURYO_WIDGET_ID: 'demo_widget_id', // Not needed for SimpleSwap integration
+    MERCURYO_SIGN_KEY: 'demo_sign_key', // Not needed for SimpleSwap integration
     
     // API Endpoints
     URLS: {
@@ -27,7 +27,7 @@ const PRODUCTION_CONFIG = {
         ENABLE_CACHING: true,
         ENABLE_PWA: true,
         DEBUG_MODE: false,
-        DEMO_MODE: true // Set to false when using real API keys
+        DEMO_MODE: false // Now using real API keys!
     },
     
     // Security Configuration
