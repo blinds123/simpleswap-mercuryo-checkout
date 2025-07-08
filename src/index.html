@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Secure cryptocurrency purchase with SimpleSwap and Mercuryo">
+    <meta name="keywords" content="cryptocurrency, bitcoin, mercuryo, simpleswap, secure">
+    <meta name="author" content="SimpleSwap Mercuryo Integration">
+    
+    <!-- Security Headers -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://api.simpleswap.io https://exchange.mrcr.io https://ipapi.co;">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <meta http-equiv="X-XSS-Protection" content="1; mode=block">
+    
+    <!-- PWA Support -->
+    <meta name="theme-color" content="#10b981">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Crypto Checkout">
+    
+    <!-- Preload Critical Resources -->
+    <link rel="preload" href="css/styles.css" as="style">
+    <link rel="preload" href="js/config/production.js" as="script">
+    
+    <title>SimpleSwap Mercuryo Checkout</title>
+    <link rel="stylesheet" href="css/styles.css">
+    
+    <!-- Analytics (Production) -->
+    <script>
+        // Initialize error tracking
+        window.errorTracker = [];
+        window.addEventListener('error', (e) => {
+            window.errorTracker.push({
+                message: e.message,
+                filename: e.filename,
+                lineno: e.lineno,
+                colno: e.colno,
+                timestamp: new Date().toISOString()
+            });
+        });
+    </script>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loadingScreen" class="loading-screen">
+        <div class="spinner"></div>
+        <p>Initializing secure checkout...</p>
+    </div>
+    
+    <!-- Main Application -->
+    <div id="app" class="app-container" style="display: none;">
+        <div class="checkout-container">
+            <!-- Header -->
+            <header class="checkout-header">
+                <h1>Secure Crypto Purchase</h1>
+                <div class="security-badge">🔒 SSL Secured</div>
+            </header>
+            
+            <!-- Amount Display -->
+            <div class="amount-section">
+                <div class="amount-display" id="amountDisplay">€19.50</div>
+                <div class="amount-subtitle">Fixed Amount</div>
+            </div>
+            
+            <!-- Payment Method -->
+            <div class="payment-method-section">
+                <div class="payment-method active" id="paymentMethod">
+                    <span class="checkmark">✓</span>
+                    <span class="provider-name">Mercuryo</span>
+                    <span class="provider-badge">Recommended</span>
+                </div>
+            </div>
+            
+            <!-- Region Information -->
+            <div class="region-info" id="regionInfo">
+                <span class="region-icon">🌍</span>
+                <span class="region-text">Detecting your location...</span>
+            </div>
+            
+            <!-- Buy Button -->
+            <button class="buy-button" id="buyButton" disabled>
+                <span class="button-text">Buy Crypto</span>
+                <span class="button-loader" style="display: none;">Processing...</span>
+            </button>
+            
+            <!-- Status Messages -->
+            <div class="status-messages">
+                <div class="success-message" id="successMessage"></div>
+                <div class="error-message" id="errorMessage"></div>
+                <div class="warning-message" id="warningMessage"></div>
+            </div>
+            
+            <!-- Footer -->
+            <footer class="checkout-footer">
+                <div class="powered-by">
+                    Powered by <strong>SimpleSwap</strong> & <strong>Mercuryo</strong>
+                </div>
+                <div class="security-info">
+                    <span>🔐 Bank-grade security</span>
+                    <span>⚡ Instant processing</span>
+                </div>
+            </footer>
+        </div>
+    </div>
+    
+    <!-- Scripts -->
+    <script src="js/config/production.js"></script>
+    <script src="js/securityManager.js"></script>
+    <script src="js/performanceManager.js"></script>
+    <script src="js/apiManager.js"></script>
+    <script src="js/geoRedirector.js"></script>
+    <script src="js/walletHandler.js"></script>
+    <script src="js/deepLinkBuilder.js"></script>
+    
+    <!-- Monitoring Scripts -->
+    <script src="monitoring/analytics.js"></script>
+    <script src="monitoring/errorMonitor.js"></script>
+    <script src="monitoring/dashboard.js"></script>
+    <script src="monitoring/monitoringIntegration.js"></script>
+    
+    <!-- Testing Scripts (Debug Mode Only) -->
+    <script>
+        // Load testing scripts only in debug mode or with test parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const shouldLoadTests = urlParams.has('debug') || urlParams.has('test') || urlParams.has('validate-security');
+        
+        if (shouldLoadTests) {
+            // Dynamically load test scripts
+            const testScripts = [
+                'tests/securityValidation.js',
+                'tests/performanceTesting.js',
+                'tests/phase2SuccessValidation.js',
+                'tests/testRunner.js'
+            ];
+            
+            testScripts.forEach(script => {
+                const scriptElement = document.createElement('script');
+                scriptElement.src = script;
+                scriptElement.async = true;
+                document.head.appendChild(scriptElement);
+            });
+            
+            console.log('🧪 Testing mode enabled - validation scripts loaded');
+        }
+    </script>
+    
+    <script>
+        // Initialize production application
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                // Initialize monitoring first
+                let monitoring = null;
+                if (typeof MonitoringIntegration !== 'undefined') {
+                    monitoring = new MonitoringIntegration(PRODUCTION_CONFIG);
+                    window.monitoring = monitoring;
+                    console.log('🔍 Monitoring integration initialized');
+                }
+                
+                // Initialize main application
+                const app = new SimpleSwapCheckoutPro();
+                window.app = app;
+                await app.initialize();
+                
+                // Track successful initialization
+                if (monitoring && monitoring.components.analytics) {
+                    monitoring.components.analytics.trackEvent('app_initialized', {
+                        timestamp: Date.now(),
+                        userAgent: navigator.userAgent,
+                        viewportSize: {
+                            width: window.innerWidth,
+                            height: window.innerHeight
+                        }
+                    });
+                }
+                
+                console.log('✅ Application initialized successfully');
+                
+            } catch (error) {
+                console.error('Application initialization failed:', error);
+                
+                // Track initialization error
+                if (window.monitoring && window.monitoring.components.errorMonitor) {
+                    window.monitoring.components.errorMonitor.handleError({
+                        type: 'app_initialization_error',
+                        message: error.message,
+                        stack: error.stack,
+                        timestamp: Date.now(),
+                        severity: 'critical'
+                    });
+                }
+                
+                // Show user-friendly error
+                const errorElement = document.getElementById('errorMessage');
+                if (errorElement) {
+                    errorElement.textContent = 'Failed to initialize application. Please refresh the page.';
+                    errorElement.style.display = 'block';
+                }
+                
+                // Hide loading screen
+                const loadingScreen = document.getElementById('loadingScreen');
+                const app = document.getElementById('app');
+                if (loadingScreen && app) {
+                    loadingScreen.style.display = 'none';
+                    app.style.display = 'flex';
+                    app.style.opacity = '1';
+                }
+            }
+        });
+        
+        // Global error handlers for runtime errors
+        window.addEventListener('error', (event) => {
+            if (window.monitoring && window.monitoring.components.errorMonitor) {
+                window.monitoring.components.errorMonitor.handleError({
+                    type: 'runtime_error',
+                    message: event.message,
+                    filename: event.filename,
+                    lineno: event.lineno,
+                    colno: event.colno,
+                    error: event.error,
+                    timestamp: Date.now(),
+                    severity: 'error'
+                });
+            }
+        });
+        
+        window.addEventListener('unhandledrejection', (event) => {
+            if (window.monitoring && window.monitoring.components.errorMonitor) {
+                window.monitoring.components.errorMonitor.handleError({
+                    type: 'unhandled_promise_rejection',
+                    message: event.reason?.message || 'Unhandled promise rejection',
+                    reason: event.reason,
+                    timestamp: Date.now(),
+                    severity: 'warning'
+                });
+            }
+        });
+        
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', () => {
+            if (window.app && typeof window.app.cleanup === 'function') {
+                window.app.cleanup();
+            }
+            
+            if (window.monitoring && typeof window.monitoring.components.analytics?.flushEvents === 'function') {
+                window.monitoring.components.analytics.flushEvents(true);
+            }
+        });
+    </script>
+</body>
+</html>

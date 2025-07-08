@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SimpleSwap Mercuryo Checkout</title>
+    <style>
+        /* Mobile-first responsive design */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .checkout-container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            padding: 32px;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+        
+        .amount-display {
+            font-size: 48px;
+            font-weight: bold;
+            color: #2d3748;
+            margin-bottom: 8px;
+        }
+        
+        .payment-method {
+            display: inline-block;
+            background: #10b981;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            margin-bottom: 24px;
+        }
+        
+        .buy-button {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            font-size: 18px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            min-height: 48px;
+            transition: all 0.2s;
+        }
+        
+        .buy-button:hover {
+            background: #059669;
+            transform: translateY(-2px);
+        }
+        
+        .buy-button:active {
+            transform: translateY(0);
+        }
+        
+        .error-message {
+            color: #ef4444;
+            margin-top: 16px;
+            padding: 12px;
+            background: #fef2f2;
+            border-radius: 8px;
+            display: none;
+        }
+        
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+        
+        /* Mobile optimizations */
+        @media (max-width: 480px) {
+            .checkout-container {
+                padding: 24px;
+            }
+            
+            .amount-display {
+                font-size: 36px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="checkout-container">
+        <div class="amount-display">€19.50</div>
+        <div class="payment-method">✓ Mercuryo</div>
+        
+        <button class="buy-button" id="buyButton">
+            Buy Crypto
+        </button>
+        
+        <div class="error-message" id="errorMessage"></div>
+    </div>
+    
+    <script src="config.js"></script>
+    <script src="geoRedirector.js"></script>
+    <script src="walletHandler.js"></script>
+    <script src="deepLinkBuilder.js"></script>
+    
+    <script>
+        // Initialize application
+        document.addEventListener('DOMContentLoaded', async () => {
+            const app = new SimpleSwapCheckout();
+            await app.initialize();
+        });
+    </script>
+</body>
+</html>

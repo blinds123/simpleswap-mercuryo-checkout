@@ -1,53 +1,122 @@
-## FEATURE:
+# SimpleSwap Mercuryo Checkout Landing Page
 
-A full PHP agentic framework using ai.pydantic.dev with gpt 4.1 mini for vision and bulk tasks, and Claude Sonnet 4 as an orchestrator - Make a HTML/CSS/JS frontend and a PHP backend. Use MySQL for database. Use CRON for scheduling.
+## Project Overview
+Build a frictionless checkout landing page that integrates with SimpleSwap's API to create pre-configured deep links forcing Mercuryo as the payment method. The system must handle €19.50 pre-fills, wallet address copying, geo-restrictions, and graceful fallbacks.
 
-You should use a system of JSON for decision making, outputting certain information from scraped or otherwise information, interacting with product details, creating content, creating collections, translating to active languages, checking data on search console of pages we've optimised or created, creating blog posts, and finding links. 
+## Core Requirements
+- **Pre-fill amount**: €19.50 (fixed)
+- **Force payment method**: Mercuryo (green highlight, not Moonpay)
+- **Supported regions**: Australia, Canada, USA
+- **Platform support**: Mobile and desktop responsive
+- **Wallet interaction**: Copy address on "Buy" button click
+- **Error handling**: Graceful fallbacks when Mercuryo unavailable
+- **Logging**: Clear console logs for debugging
 
-The agents should be extremely intelligent, they can access the internet through Jina as needed. Everything should include competitor analysis that we do, so before making any pages there should be analysis of the SERP using JINA searches.
+## Research Requirements (Ultraink Phase)
+Research ONLY official documentation pages:
 
-There should be a basic access code system, with an admin dashboard where I can generate access codes. This should be secure from SQL injections and anything else you can think of. Once an access code is generated I should be able to give access to the tool to someone. The onboarding should include: Shopify PAT, My Shopify Store URL, Live Store URL, Country of focus (optional), base language (language everything will be optimized into)
+### SimpleSwap Documentation
+- https://simpleswap.io - Main platform understanding
+- https://simpleswap.io/api - API endpoints and parameters
+- https://simpleswap.io/affiliate-program/en/help-center/article/fiat-api - Fiat integration specifics
+- Additional SimpleSwap API docs as discovered
 
-Jina has two useful things - s.jina.ai which allows you to scrape search engine results, finding relevant URLs - you can use search operators with an s.jina.ai search, and with r.jina.ai you can turn any webpage into LLM readable markdown including links and images - which is useful for a lot of things for this project. Please implement jina in an intelligent way across the agents. Jina search can also be specified the language and country so use that in an intelligent way. Jina, for example, should be used to create a business description when something like a relevancy check is needed - this allows the relevancy check to check if the content is relevant to the store. This is one example usage of Jina. You will need to use it a lot.
+### Mercuryo Documentation  
+- https://docs.mercuryo.io - Complete API reference
+- Payment method selection mechanisms
+- Regional availability endpoints
+- Error handling best practices
 
-The user dashboard should just be a simple way to turn on all agents or individual agents, and then see the results of those actions - as many data points as possible. You can use AI to generate JSON and then display the JSON objects to the user as a handy way to give them information, also you can use a notificaiton system to show them what is happening, as well as a constant feed on each of the separate agent pages on the left to show them what it's doing. Combine agents where needed onto one dashboard page (keep them as separate agents but combine their results - for example the collection agents can be combined - and the product optimizing agent with the product tagger)
+### Research Process
+1. **Deep scrape 30-100 pages** from official docs only
+2. **Store in /research/** directory organized by technology
+3. **Create llm.txt** summaries for each major component
+4. **Validate all API endpoints** and parameters before implementation
+5. **Document regional restrictions** and availability checks
 
-Make it so I can easily add another agent by giving me detailed documentation on how my agents work and how I can easily prompt you to build another agent by just telling you what I want it to do, and you will always know to add it to the orchestrator's task list.
+## 3-Phase Development Structure
 
-The flow should look something like: Orchestrator agent "wakes up" and checks the context of the day (new products? what's been optimized so far today? What needs optimizing or creating now etc.) - then it activates various other agents through CRON jobs, those agents then activate, do their work, and send it back to the orchestrator to check against the context of the store (for example for collections, in order to not generate duplicates)
+### Phase 1: Skeleton Implementation (phase-1.md)
+- Basic HTML structure with responsive design
+- SimpleSwap API integration foundation
+- Mercuryo payment method selection logic
+- Basic wallet address handling
+- Console logging framework
 
-Agents should be designed as intelligent human beings by giving them decision making, ability to do detailed research using Jina, and not just your basic propmts that generate absolute shit. This is absolutely vital.
+### Phase 2: Production Ready (phase-2.md)
+- Complete error handling and fallbacks
+- Geo-restriction validation
+- Mobile optimization
+- Production-grade logging
+- Performance optimizations
+- Security validations
 
-There should be the following agents:
+### Phase 3: Testing & Validation (phase-3.md)
+- Comprehensive unit tests
+- Cross-browser compatibility
+- Mobile device testing
+- Regional access testing
+- Error scenario validation
+- User flow testing
 
-1. Orchestrator agent - Claude Sonnet 4 - should orchestrate the entire process - including quota for the day, assigning tasks to other agents and monitoring progress, as well as ensuring that the other agents don't create spammy content or duplicates by always checking current content on the site vs. the content generated by agents. The orchestrator should be focused specifically on being sticky, so for keeping people for as long as possible - it should take all possible tasks that can be done by our agents according to how many products, images, collections, everything the site has currnetly, and then ensuring the process takes a long time so people stay with the tool for as long as possible, prioritizing both growth for the client but also stickiness for the tool. If a new product is added by the company, as in it's new in our database, we should also then optimize it and instantly tag it with any relevant tags and therefore adding it to collections. We aim for people to stay with us for a year.
-2. Product Optimizing Agent - GPT 4.1 Mini - should optimize product titles according to the SERP, descriptions, meta descriptions, and meta titles.
-3. Product tagging agent - GPT 4.1 Mini - Should tag already existing products on the site with any new collections generated by the collection agent, and should also tag any products that are optimized by the product optimizing agent with new tags, thus generating opportunities for new collections
-4. Collection Agent - GPT 4.1 Mini - Should generate new collections based on the products that are optimized by the product optimizing agent and should also optimize any currently existing collections on the site, based on whether they have less than 3 words in the title, or don't have a description, or have a description that is under 100 characters, it should optimize them. 
-5. Blog Agent - Claude Sonnet 4 - Should generate blog posts based on the products on the website, the collections on the website, and create interesting content that makes sense, which should include internal links to the collection pages as well as embedded product images arranged in product boxes using HTML/CSS/JS - The title will be taken from the admin dashboard, or from the API upload, so start the blog with an H2, make the blogs genuinely interesting, genuinely good looking, using infographics and things using data found online by jina searches and jina scrapes.
-6. Link building agent - claude sonnet 4 for planning, gpt 4.1 mini for scraping - You need to use search operators like "write for us", "submit a guest post" with a couple of words from the niche - and it should then scrape those pages and find information about guest posts then display them back in a friendly way.
-7. Holiday Collection Agent - Claude Sonnet 4 - Should look if there is a holiday coming up in exactly 60 days from today, these holidays should be relevant to the countries that can be inferred from the languages set on the store + the base language of the store, for example if they have Spanish activated it should look in Chile and Spain and all other Spanish speaking countries - then it should use a relevancy check prompt to ensure the holiday has a 80+ relevancy score to that store, and then generate the holiday collection(s) - max 6.
-8. Life Event Collection Agent - Claude Sonnet 4 - Should sometimes (like once a week or something) generate collections based off life events that are relevant to the store - the life events are things like weddings if it's a clothing store, if it's a gift store something like birthdays - that kind of stuff. 
+## Expected File Structure
 
+```
+/
+├── index.html              # Main landing page
+├── deepLinkBuilder.js      # SimpleSwap URL construction
+├── walletHandler.js        # Wallet address management
+├── geoRedirector.js        # Regional access control
+├── styles.css              # Responsive styling
+├── config.js               # Environment and API configuration
+├── /research/              # Documentation research
+│   ├── /simpleswap/        # SimpleSwap API docs
+│   └── /mercuryo/          # Mercuryo integration docs
+├── /tests/                 # Test suite
+└── README.md               # Setup and usage instructions
+```
 
+## Technical Implementation Requirements
 
-## EXAMPLES:
+### Core Components
+- **deepLinkBuilder.js**: Construct SimpleSwap URLs with Mercuryo forced
+- **walletHandler.js**: Handle wallet address copying and validation
+- **geoRedirector.js**: Validate regional access and redirect logic
+- **Responsive Design**: Mobile-first approach with desktop optimization
 
-[Provide and explain examples that you have in the `examples/` folder]
+### API Integration Specifications
+- Use official SimpleSwap API endpoints only
+- Implement proper error handling for API failures
+- Cache responses where appropriate
+- Validate all parameters before API calls
 
-## DOCUMENTATION - You must scrape 10-15 pages at least per link here as documentations NEVER have relevant information on one page.
+### User Experience Flow
+1. User lands on page with €19.50 pre-filled
+2. System validates user's region (AU/CA/USA)
+3. Mercuryo appears highlighted (green) as payment method
+4. User clicks "Buy" → wallet address copied to clipboard
+5. Deep link opens SimpleSwap with Mercuryo pre-selected
+6. Fallback to error page if Mercuryo unavailable
 
-Pydantic AI documentation: https://ai.pydantic.dev/
-Open AI Documentation: https://platform.openai.com/docs/overview
-Anthropic Documentation: https://docs.anthropic.com/en/home
-Reader API Jina: https://jina.ai/reader/ (includes search jina)
-Shopify GraphQL Admin API (preferred): https://shopify.dev/docs/api/admin-graphql
-Shopify Admin APi: https://shopify.dev/docs/api/admin-rest
-Search Console API: https://developers.google.com/webmaster-tools
-Ahrefs API Rapid API: https://rapidapi.com/ayushsomanime/api/ahrefs-dr-rank-checker/playground
+## Quality Standards
+- **No hallucinated APIs**: All endpoints must be verified from official docs
+- **Production-ready code**: Full error handling, logging, security
+- **Cross-platform compatibility**: Mobile and desktop tested
+- **Graceful degradation**: Clear error messages and fallbacks
+- **Performance optimized**: Fast loading, minimal dependencies
 
+## Success Criteria
+- ✅ €19.50 pre-fills correctly
+- ✅ Mercuryo shows as highlighted payment option
+- ✅ Works in AU/CA/USA regions
+- ✅ Wallet address copies on button click
+- ✅ Mobile and desktop responsive
+- ✅ Clear error handling and logging
+- ✅ No fallback to Moonpay unless intended
 
-## OTHER CONSIDERATIONS:
-
-Designsystem.md - must be adhered to at all times for building any new features
-Scrape this website for the CSS style I want - do not copy their design system, but use the CSS styles they have https://seogrove.ai/ - This is my website so you can copy most of the content etc.
+## Development Notes
+- Use Docker for all Python commands and testing
+- Follow PEP8 and include type hints
+- Create unit tests for all major functions
+- Update TASK.md with progress tracking
+- Never assume API behavior - validate with official docs

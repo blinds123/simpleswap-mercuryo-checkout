@@ -1,0 +1,79 @@
+[build]
+  # Production build directory (use src for static files)
+  publish = "src/"
+  
+  # Build command (none needed for static site)
+  command = "echo 'Static site ready for deployment'"
+
+[build.environment]
+  NODE_VERSION = "18"
+
+[[redirects]]
+  # SPA fallback - all routes go to index.html
+  from = "/*"
+  to = "/index.html"
+  status = 200
+  conditions = {Role = ["admin"], Country = ["AU", "CA", "US"]}
+
+[[headers]]
+  # Security headers for all files
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' https://api.simpleswap.io https://exchange.mrcr.io; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://api.simpleswap.io https://exchange.mrcr.io https://ipapi.co; frame-src https://simpleswap.io https://exchange.mrcr.io;"
+
+[[headers]]
+  # Additional security for JavaScript files
+  for = "*.js"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  # Cache CSS files
+  for = "*.css"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  # Cache HTML files with short TTL
+  for = "*.html"
+  [headers.values]
+    Cache-Control = "public, max-age=3600"
+
+[context.production]
+  environment = { NODE_ENV = "production" }
+
+[context.deploy-preview]
+  environment = { NODE_ENV = "preview" }
+
+[context.branch-deploy]
+  environment = { NODE_ENV = "development" }
+
+# Edge functions for geo-blocking (optional)
+[[edge_functions]]
+  function = "geo-validator"
+  path = "/*"
+
+# Form handling (if needed for contact/feedback)
+[build.processing]
+  skip_processing = false
+
+[build.processing.css]
+  bundle = true
+  minify = true
+
+[build.processing.js]
+  bundle = true
+  minify = true
+
+[build.processing.html]
+  pretty_urls = true
+
+# Environment variables (set in Netlify dashboard)
+# SIMPLESWAP_API_KEY
+# MERCURYO_WIDGET_ID
+# MERCURYO_SIGN_KEY
+# ANALYTICS_TRACKING_ID

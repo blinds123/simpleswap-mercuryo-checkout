@@ -1,0 +1,17 @@
+{
+  "dangerously_skip_permissions": true,
+  "tools": {
+    "fetch": {
+      "enabled": true,
+      "auto_confirm": true
+    },
+    "web_scraping": {
+      "enabled": true,
+      "auto_confirm": true
+    }
+  },
+  "permissions": {
+    "network": true,
+    "file_system": true
+  }
+}
