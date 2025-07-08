@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Secure cryptocurrency purchase with SimpleSwap and Mercuryo">
+    <title>SimpleSwap Mercuryo Checkout - Bitcoin Version</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loadingScreen" class="loading-screen">
+        <div class="spinner"></div>
+        <p>Initializing secure checkout...</p>
+    </div>
+    
+    <!-- Main Application -->
+    <div id="app" class="app-container" style="display: none;">
+        <div class="checkout-container">
+            <!-- Header -->
+            <header class="checkout-header">
+                <h1>Secure Crypto Purchase</h1>
+                <div class="security-badge">🔒 SSL Secured</div>
+            </header>
+            
+            <!-- Amount Display -->
+            <div class="amount-section">
+                <div class="amount-display" id="amountDisplay">€19.50</div>
+                <div class="amount-subtitle">Fixed Amount</div>
+            </div>
+            
+            <!-- Payment Method -->
+            <div class="payment-method-section">
+                <div class="payment-method active" id="paymentMethod">
+                    <span class="checkmark">✓</span>
+                    <span class="provider-name">Mercuryo</span>
+                    <span class="provider-badge">Recommended</span>
+                </div>
+            </div>
+            
+            <!-- Region Information -->
+            <div class="region-info" id="regionInfo">
+                <span class="region-icon">🌍</span>
+                <span class="region-text">Detecting your location...</span>
+            </div>
+            
+            <!-- Wallet Address Display -->
+            <div class="wallet-section">
+                <label for="walletDisplay">Bitcoin Wallet Address:</label>
+                <div class="wallet-display" id="walletDisplay">1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa</div>
+                <div class="wallet-info">✓ Pre-configured Genesis Block address</div>
+            </div>
+            
+            <!-- Buy Button -->
+            <button class="buy-button" id="buyButton">
+                <span class="button-text">Buy Crypto</span>
+                <span class="button-loader" id="buttonLoader" style="display: none;">Processing...</span>
+            </button>
+            
+            <!-- Status Messages -->
+            <div class="status-messages">
+                <div class="success-message" id="successMessage"></div>
+                <div class="error-message" id="errorMessage"></div>
+                <div class="warning-message" id="warningMessage"></div>
+            </div>
+            
+            <!-- Footer -->
+            <footer class="checkout-footer">
+                <div class="powered-by">
+                    Powered by <strong>SimpleSwap</strong> & <strong>Mercuryo</strong>
+                </div>
+                <div class="security-info">
+                    <span>🔐 Bank-grade security</span>
+                    <span>⚡ Instant processing</span>
+                </div>
+            </footer>
+        </div>
+    </div>
+    
+    <script>
+        // Production SimpleSwap + Mercuryo Integration
+        class SimpleSwapMercuryoCheckout {
+            constructor() {
+                this.config = {
+                    // Your actual SimpleSwap API key (supports fiat exchanges!)
+                    SIMPLESWAP_API_KEY: '678f89b3-e398-45a6-a9f6-091863527d0a',
+                    
+                    // Transaction configuration
+                    AMOUNT: 19.50,
+                    FROM_CURRENCY: 'eur',
+                    TO_CURRENCY: 'btc', // Bitcoin version
+                    PARTNER_ID: 'mercuryo_checkout',
+                    
+                    // API endpoints
+                    SIMPLESWAP_API: 'https://api.simpleswap.io',
+                    SIMPLESWAP_WIDGET: 'https://simpleswap.io',
+                    
+                    // Regional compliance
+                    SUPPORTED_COUNTRIES: ['AU', 'CA', 'US'],
+                    RESTRICTED_US_STATES: ['NY', 'HI', 'LA']
+                };
+                
+                this.userLocation = null;
+                this.walletAddress = '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa'; // Pre-configured Bitcoin address
+                this.exchangeData = null;
+            }
+            
+            async initialize() {
+                try {
+                    console.log('🚀 Initializing SimpleSwap + Mercuryo Checkout...');
+                    console.log('🔑 API Key configured:', this.config.SIMPLESWAP_API_KEY.substring(0, 8) + '...');
+                    
+                    // Detect user location
+                    await this.detectLocation();
+                    
+                    // Setup UI interactions
+                    this.setupEventListeners();
+                    
+                    // Test API connectivity
+                    await this.testAPIConnectivity();
+                    
+                    // Show the app
+                    this.showApp();
+                    
+                    console.log('✅ Checkout initialized successfully');
+                    
+                } catch (error) {
+                    console.error('❌ Initialization failed:', error);
+                    this.showError('Failed to initialize checkout. Please refresh the page.');
+                }
+            }
+            
+            async testAPIConnectivity() {
+                try {
+                    console.log('🔍 Testing SimpleSwap API connectivity...');
+                    
+                    // Test with a simple get_estimated call
+                    const url = `${this.config.SIMPLESWAP_API}/get_estimated?` +
+                        `api_key=${this.config.SIMPLESWAP_API_KEY}&` +
+                        `currency_from=${this.config.FROM_CURRENCY}&` +
+                        `currency_to=${this.config.TO_CURRENCY}&` +
+                        `amount=${this.config.AMOUNT}&` +
+                        `fixed=false`;
+                    
+                    const response = await fetch(url);
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        console.log('✅ API connectivity test passed:', data);
+                        this.exchangeData = data;
+                    } else {
+                        console.warn('⚠️ API test returned non-200:', response.status, response.statusText);
+                    }
+                    
+                } catch (error) {
+                    console.warn('⚠️ API connectivity test failed:', error);
+                    // Continue anyway - might be CORS in browser
+                }
+            }
+            
+            async detectLocation() {
+                try {
+                    const response = await fetch('https://ipapi.co/json/');
+                    const data = await response.json();
+                    
+                    this.userLocation = {
+                        country: data.country_code,
+                        region: data.region_code,
+                        city: data.city
+                    };
+                    
+                    console.log('📍 Location detected:', this.userLocation);
+                    this.validateRegionAccess();
+                    
+                } catch (error) {
+                    console.warn('⚠️ Location detection failed:', error);
+                    this.userLocation = { country: 'UNKNOWN' };
+                    this.updateRegionDisplay('Location unknown - Proceeding with checkout', '🌍');
+                }
+            }
+            
+            validateRegionAccess() {
+                const country = this.userLocation?.country;
+                
+                if (!country || country === 'UNKNOWN') {
+                    this.updateRegionDisplay('Location unknown - Proceeding with checkout', '🌍');
+                    return;
+                }
+                
+                if (!this.config.SUPPORTED_COUNTRIES.includes(country)) {
+                    this.updateRegionDisplay('Service not available in your region', '❌');
+                    this.showError('This service is currently only available in Australia, Canada, and USA.');
+                    return;
+                }
+                
+                if (country === 'US' && this.config.RESTRICTED_US_STATES.includes(this.userLocation.region)) {
+                    this.updateRegionDisplay(`Not available in ${this.userLocation.region}`, '❌');
+                    this.showError(`This service is not available in ${this.userLocation.region} due to local regulations.`);
+                    return;
+                }
+                
+                const countryNames = { AU: 'Australia', CA: 'Canada', US: 'United States' };
+                this.updateRegionDisplay(`Available in ${countryNames[country]}`, '✅');
+            }
+            
+            updateRegionDisplay(text, icon) {
+                const regionInfo = document.getElementById('regionInfo');
+                regionInfo.innerHTML = `<span class="region-icon">${icon}</span><span class="region-text">${text}</span>`;
+            }
+            
+            setupEventListeners() {
+                const buyButton = document.getElementById('buyButton');
+                
+                // Enable buy button immediately since wallet is pre-configured
+                buyButton.disabled = false;
+                
+                buyButton.addEventListener('click', () => {
+                    this.initiatePurchase();
+                });
+                
+                console.log('✅ Wallet pre-configured:', this.walletAddress);
+            }
+            
+            // Wallet validation no longer needed - pre-configured address
+            validateWalletAddress() {
+                // Address is pre-configured and valid
+                console.log('✅ Using pre-configured Polygon address:', this.walletAddress);
+            }
+            
+            async initiatePurchase() {
+                try {
+                    console.log('🛒 Initiating SimpleSwap EUR → BTC purchase...');
+                    
+                    this.setButtonLoading(true);
+                    
+                    // Method 1: Try to create exchange via API
+                    try {
+                        await this.createExchangeViaAPI();
+                    } catch (apiError) {
+                        console.warn('⚠️ API method failed, falling back to widget URL:', apiError);
+                        this.createExchangeViaWidget();
+                    }
+                    
+                } catch (error) {
+                    console.error('❌ Purchase failed:', error);
+                    this.showError('Failed to initiate purchase. Please try again.');
+                    this.setButtonLoading(false);
+                }
+            }
+            
+            async createExchangeViaAPI() {
+                console.log('🔄 Attempting API exchange creation...');
+                
+                const url = `${this.config.SIMPLESWAP_API}/create_exchange?api_key=${this.config.SIMPLESWAP_API_KEY}`;
+                
+                const payload = {
+                    fixed: false,
+                    currency_from: this.config.FROM_CURRENCY,
+                    currency_to: this.config.TO_CURRENCY,
+                    amount: this.config.AMOUNT,
+                    address_to: this.walletAddress,
+                    user_refund_address: this.walletAddress,
+                    extra_id_to: '',
+                    user_refund_extra_id: ''
+                };
+                
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`API returned ${response.status}: ${response.statusText}`);
+                }
+                
+                const exchangeData = await response.json();
+                console.log('✅ Exchange created via API:', exchangeData);
+                
+                // Redirect to SimpleSwap with exchange ID
+                const exchangeUrl = `${this.config.SIMPLESWAP_WIDGET}/exchange/${exchangeData.id}`;
+                
+                this.showSuccess('Exchange created! Redirecting to payment...');
+                
+                setTimeout(() => {
+                    window.location.href = exchangeUrl; // Direct navigation instead of popup
+                    this.setButtonLoading(false);
+                }, 1500);
+            }
+            
+            createExchangeViaWidget() {
+                console.log('🎨 Creating exchange via widget URL...');
+                
+                // Build SimpleSwap widget URL with fiat payment forced
+                const widgetUrl = this.buildSimpleSwapWidgetURL();
+                
+                this.showSuccess('Redirecting to SimpleSwap with locked parameters!');
+                
+                // Enhanced instructions for Bitcoin version
+                const userChoice = confirm('Ready to proceed to SimpleSwap!\n\n✨ Pre-configured transaction:\n• €19.50 EUR → Bitcoin (BTC)\n• Mercuryo payment method\n• Genesis Block wallet address included\n\n⚠️ Important: If values change automatically,\nplease manually reset to €19.50 and select Mercuryo\n\nClick OK to continue!');
+                
+                setTimeout(() => {
+                    if (userChoice) {
+                        window.location.href = widgetUrl; // Same tab
+                    } else {
+                        // Try new tab, with fallback message if blocked
+                        const newTab = window.open(widgetUrl, '_blank');
+                        if (!newTab || newTab.closed || typeof newTab.closed == 'undefined') {
+                            this.showError('Popup blocked. Click here to proceed: ' + widgetUrl);
+                        }
+                    }
+                    this.setButtonLoading(false);
+                    console.log('🔗 Directing to SimpleSwap widget:', widgetUrl);
+                }, 500);
+            }
+            
+            buildSimpleSwapWidgetURL() {
+                // Enhanced parameters to prevent mobile overrides
+                const baseUrl = `${this.config.SIMPLESWAP_WIDGET}/`;
+                
+                const params = new URLSearchParams({
+                    // API key for tracking
+                    partner: this.config.SIMPLESWAP_API_KEY,
+                    
+                    // Transaction details with mobile-friendly parameters
+                    from: this.config.FROM_CURRENCY,
+                    to: this.config.TO_CURRENCY,
+                    amount: this.config.AMOUNT,
+                    
+                    // Force specific values to prevent overrides
+                    fixed_amount: 'true',
+                    fixed_from: 'true', 
+                    fixed_to: 'true',
+                    
+                    // Force Mercuryo provider
+                    provider: 'mercuryo',
+                    payment_method: 'mercuryo',
+                    
+                    // User's wallet
+                    address: this.walletAddress,
+                    
+                    // Mobile-specific settings
+                    mobile: 'true',
+                    theme: 'light',
+                    
+                    // Prevent auto-changes
+                    lock_amount: '1',
+                    lock_currency: '1'
+                });
+                
+                const finalUrl = `${baseUrl}?${params.toString()}`;
+                console.log('🔗 Built enhanced SimpleSwap URL:', finalUrl);
+                return finalUrl;
+            }
+            
+            setButtonLoading(loading) {
+                const buyButton = document.getElementById('buyButton');
+                const buttonText = buyButton.querySelector('.button-text');
+                const buttonLoader = document.getElementById('buttonLoader');
+                
+                if (loading) {
+                    buttonText.style.display = 'none';
+                    buttonLoader.style.display = 'flex';
+                    buyButton.disabled = true;
+                } else {
+                    buttonText.style.display = 'inline';
+                    buttonLoader.style.display = 'none';
+                    buyButton.disabled = !this.walletAddress || !this.validateWalletAddressQuiet();
+                }
+            }
+            
+            validateWalletAddressQuiet() {
+                // Always valid since address is pre-configured
+                return true;
+            }
+            
+            showApp() {
+                setTimeout(() => {
+                    document.getElementById('loadingScreen').style.display = 'none';
+                    const app = document.getElementById('app');
+                    app.style.display = 'flex';
+                    app.style.opacity = '1';
+                }, 1000);
+            }
+            
+            showError(message) {
+                const errorElement = document.getElementById('errorMessage');
+                errorElement.textContent = message;
+                errorElement.style.display = 'block';
+                
+                document.getElementById('successMessage').style.display = 'none';
+                document.getElementById('warningMessage').style.display = 'none';
+            }
+            
+            showSuccess(message) {
+                const successElement = document.getElementById('successMessage');
+                successElement.textContent = message;
+                successElement.style.display = 'block';
+                
+                document.getElementById('errorMessage').style.display = 'none';
+                document.getElementById('warningMessage').style.display = 'none';
+            }
+        }
+        
+        // Initialize the checkout
+        document.addEventListener('DOMContentLoaded', async () => {
+            const checkout = new SimpleSwapMercuryoCheckout();
+            window.checkout = checkout; // For debugging
+            await checkout.initialize();
+        });
+    </script>
+    
+    <style>
+        /* Wallet input styles */
+        .wallet-section {
+            margin-bottom: 24px;
+        }
+        
+        .wallet-section label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #374151;
+            font-size: 14px;
+        }
+        
+        .wallet-display {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #10b981;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: monospace;
+            background: #f0fdf4;
+            color: #15803d;
+            font-weight: 600;
+            word-break: break-all;
+            box-sizing: border-box;
+        }
+        
+        .wallet-info {
+            margin-top: 6px;
+            font-size: 12px;
+            color: #10b981;
+            font-weight: 500;
+        }
+        
+        .wallet-validation {
+            margin-top: 6px;
+            font-size: 12px;
+            min-height: 16px;
+        }
+        
+        .buy-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .button-loader {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .button-loader::before {
+            content: '';
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @media (max-width: 480px) {
+            .wallet-input {
+                font-size: 12px;
+                padding: 10px 12px;
+            }
+        }
+    </style>
+</body>
+</html>

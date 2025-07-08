@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Secure cryptocurrency purchase with SimpleSwap and Mercuryo">
+    <title>SimpleSwap Mercuryo Checkout - Demo</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loadingScreen" class="loading-screen">
+        <div class="spinner"></div>
+        <p>Initializing secure checkout...</p>
+    </div>
+    
+    <!-- Main Application -->
+    <div id="app" class="app-container" style="display: none;">
+        <div class="checkout-container">
+            <!-- Header -->
+            <header class="checkout-header">
+                <h1>Secure Crypto Purchase</h1>
+                <div class="security-badge">🔒 SSL Secured</div>
+            </header>
+            
+            <!-- Amount Display -->
+            <div class="amount-section">
+                <div class="amount-display" id="amountDisplay">€19.50</div>
+                <div class="amount-subtitle">Fixed Amount</div>
+            </div>
+            
+            <!-- Payment Method -->
+            <div class="payment-method-section">
+                <div class="payment-method active" id="paymentMethod">
+                    <span class="checkmark">✓</span>
+                    <span class="provider-name">Mercuryo</span>
+                    <span class="provider-badge">Recommended</span>
+                </div>
+            </div>
+            
+            <!-- Region Information -->
+            <div class="region-info" id="regionInfo">
+                <span class="region-icon">🌍</span>
+                <span class="region-text">Demo mode - All regions supported</span>
+            </div>
+            
+            <!-- Buy Button -->
+            <button class="buy-button" id="buyButton">
+                <span class="button-text">Buy Crypto</span>
+            </button>
+            
+            <!-- Status Messages -->
+            <div class="status-messages">
+                <div class="success-message" id="successMessage"></div>
+                <div class="error-message" id="errorMessage"></div>
+                <div class="warning-message" id="warningMessage"></div>
+            </div>
+            
+            <!-- Footer -->
+            <footer class="checkout-footer">
+                <div class="powered-by">
+                    Powered by <strong>SimpleSwap</strong> & <strong>Mercuryo</strong>
+                </div>
+                <div class="security-info">
+                    <span>🔐 Bank-grade security</span>
+                    <span>⚡ Instant processing</span>
+                </div>
+            </footer>
+        </div>
+    </div>
+    
+    <script>
+        // Simple demo application
+        document.addEventListener('DOMContentLoaded', () => {
+            // Hide loading screen
+            setTimeout(() => {
+                document.getElementById('loadingScreen').style.display = 'none';
+                const app = document.getElementById('app');
+                app.style.display = 'flex';
+                app.style.opacity = '1';
+                
+                console.log('✅ Demo application initialized successfully');
+            }, 1000);
+            
+            // Simple buy button functionality
+            document.getElementById('buyButton').addEventListener('click', () => {
+                const successMsg = document.getElementById('successMessage');
+                successMsg.textContent = '✓ Demo wallet address copied! In production, this would redirect to SimpleSwap.';
+                successMsg.style.display = 'block';
+                
+                // Hide message after 3 seconds
+                setTimeout(() => {
+                    successMsg.style.display = 'none';
+                }, 3000);
+                
+                console.log('Demo: Buy button clicked - would redirect to SimpleSwap with Mercuryo');
+            });
+        });
+    </script>
+</body>
+</html>
