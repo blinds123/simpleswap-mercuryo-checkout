@@ -303,7 +303,7 @@
                 this.showSuccess('Exchange created! Redirecting to payment...');
                 
                 setTimeout(() => {
-                    window.open(exchangeUrl, '_blank');
+                    window.location.href = exchangeUrl; // Direct navigation instead of popup
                     this.setButtonLoading(false);
                 }, 1500);
             }
@@ -314,13 +314,24 @@
                 // Build SimpleSwap widget URL with fiat payment forced
                 const widgetUrl = this.buildSimpleSwapWidgetURL();
                 
-                this.showSuccess('Opening SimpleSwap with Mercuryo payment...');
+                this.showSuccess('Ready to proceed to SimpleSwap with Mercuryo payment...');
+                
+                // Give user choice: redirect or open in new tab
+                const userChoice = confirm('Ready to proceed to SimpleSwap!\n\nClick OK to go to SimpleSwap now, or Cancel to open in a new tab.');
                 
                 setTimeout(() => {
-                    window.open(widgetUrl, '_blank');
+                    if (userChoice) {
+                        window.location.href = widgetUrl; // Same tab
+                    } else {
+                        // Try new tab, with fallback message if blocked
+                        const newTab = window.open(widgetUrl, '_blank');
+                        if (!newTab || newTab.closed || typeof newTab.closed == 'undefined') {
+                            this.showError('Popup blocked. Click here to proceed: ' + widgetUrl);
+                        }
+                    }
                     this.setButtonLoading(false);
-                    console.log('🔗 Opened SimpleSwap widget:', widgetUrl);
-                }, 1500);
+                    console.log('🔗 Directing to SimpleSwap widget:', widgetUrl);
+                }, 500);
             }
             
             buildSimpleSwapWidgetURL() {
