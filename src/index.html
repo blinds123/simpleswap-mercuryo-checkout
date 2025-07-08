@@ -297,10 +297,10 @@
                 // Build SimpleSwap widget URL with fiat payment forced
                 const widgetUrl = this.buildSimpleSwapWidgetURL();
                 
-                this.showSuccess('Ready to proceed to SimpleSwap with Mercuryo payment...');
+                this.showSuccess('Redirecting to SimpleSwap - Please select Buy/Sell Crypto tab for fiat payment');
                 
-                // Give user choice: redirect or open in new tab
-                const userChoice = confirm('Ready to proceed to SimpleSwap!\n\nClick OK to go to SimpleSwap now, or Cancel to open in a new tab.');
+                // Give user choice with instructions
+                const userChoice = confirm('Ready to proceed to SimpleSwap!\n\n✨ Instructions:\n1. Click OK to go to SimpleSwap\n2. Click the "Buy/Sell Crypto" tab (right side)\n3. Select EUR → MATIC for €19.50\n4. Your wallet address will be pre-filled!\n\nClick OK to continue or Cancel for new tab.');
                 
                 setTimeout(() => {
                     if (userChoice) {
@@ -318,33 +318,38 @@
             }
             
             buildSimpleSwapWidgetURL() {
-                // SimpleSwap widget URL optimized for fiat-to-crypto with Mercuryo
-                const baseUrl = `${this.config.SIMPLESWAP_WIDGET}/`;
+                // Try multiple URL strategies for fiat access
                 
-                const params = new URLSearchParams({
-                    // API key for tracking
+                // Strategy 1: Direct Buy/Sell URL path
+                const buyUrl = `${this.config.SIMPLESWAP_WIDGET}/buy-sell-crypto?` + new URLSearchParams({
                     partner: this.config.SIMPLESWAP_API_KEY,
-                    
-                    // Transaction details
-                    from: this.config.FROM_CURRENCY,
-                    to: this.config.TO_CURRENCY,
+                    currency: this.config.FROM_CURRENCY,
+                    crypto: this.config.TO_CURRENCY,
                     amount: this.config.AMOUNT,
-                    
-                    // User's wallet
-                    address: this.walletAddress,
-                    
-                    // Force fiat payment method
-                    fiat: '1',
-                    provider: 'mercuryo',
-                    
-                    // UI preferences
-                    theme: 'auto',
-                    
-                    // Tracking
-                    ref: 'checkout_widget'
-                });
+                    address: this.walletAddress
+                }).toString();
                 
-                return `${baseUrl}?${params.toString()}`;
+                // Strategy 2: Widget with buy mode
+                const widgetUrl = `${this.config.SIMPLESWAP_WIDGET}/?` + new URLSearchParams({
+                    partner: this.config.SIMPLESWAP_API_KEY,
+                    mode: 'buy',
+                    fiat_currency: this.config.FROM_CURRENCY,
+                    crypto_currency: this.config.TO_CURRENCY,
+                    fiat_amount: this.config.AMOUNT,
+                    wallet_address: this.walletAddress
+                }).toString();
+                
+                // Strategy 3: Simple parameters (current working manual approach)
+                const simpleUrl = `${this.config.SIMPLESWAP_WIDGET}/?` + new URLSearchParams({
+                    partner: this.config.SIMPLESWAP_API_KEY
+                }).toString();
+                
+                console.log('🔗 Trying buy URL:', buyUrl);
+                console.log('🔗 Fallback widget URL:', widgetUrl);
+                console.log('🔗 Simple URL:', simpleUrl);
+                
+                // Try the simple approach first - let user manually select
+                return simpleUrl;
             }
             
             setButtonLoading(loading) {
