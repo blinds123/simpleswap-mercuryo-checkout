@@ -5,9 +5,11 @@
 
 // Production Environment Configuration
 const PRODUCTION_CONFIG = {
-    // API Configuration
-    SIMPLESWAP_API_KEY: process.env.SIMPLESWAP_API_KEY || 'demo_api_key',
-    MERCURYO_WIDGET_ID: process.env.MERCURYO_WIDGET_ID || 'demo_widget_id',
+    // API Configuration (Update these with your real API keys)
+    SIMPLESWAP_API_KEY: 'demo_api_key',
+    SIMPLESWAP_PARTNER_ID: 'demo_partner_id',
+    MERCURYO_WIDGET_ID: 'demo_widget_id',
+    MERCURYO_SIGN_KEY: 'demo_sign_key',
     
     // API Endpoints
     URLS: {
@@ -24,7 +26,8 @@ const PRODUCTION_CONFIG = {
         ENABLE_SECURITY_LOGGING: true,
         ENABLE_CACHING: true,
         ENABLE_PWA: true,
-        DEBUG_MODE: false
+        DEBUG_MODE: false,
+        DEMO_MODE: true // Set to false when using real API keys
     },
     
     // Security Configuration
