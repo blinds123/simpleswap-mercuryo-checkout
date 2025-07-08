@@ -44,15 +44,15 @@
                 <span class="region-text">Detecting your location...</span>
             </div>
             
-            <!-- Wallet Address Input -->
+            <!-- Wallet Address Display -->
             <div class="wallet-section">
-                <label for="walletInput">Your Bitcoin Address:</label>
-                <input type="text" id="walletInput" placeholder="Enter your BTC wallet address" class="wallet-input">
-                <div class="wallet-validation" id="walletValidation"></div>
+                <label for="walletDisplay">Polygon Wallet Address:</label>
+                <div class="wallet-display" id="walletDisplay">0xE5173e7c3089bD89cd1341b637b8e1951745ED5C</div>
+                <div class="wallet-info">✓ Pre-configured for your convenience</div>
             </div>
             
             <!-- Buy Button -->
-            <button class="buy-button" id="buyButton" disabled>
+            <button class="buy-button" id="buyButton">
                 <span class="button-text">Buy Crypto</span>
                 <span class="button-loader" id="buttonLoader" style="display: none;">Processing...</span>
             </button>
@@ -88,7 +88,7 @@
                     // Transaction configuration
                     AMOUNT: 19.50,
                     FROM_CURRENCY: 'eur',
-                    TO_CURRENCY: 'btc', // Try Bitcoin instead - more likely to support fiat
+                    TO_CURRENCY: 'matic', // Back to Polygon as requested
                     PARTNER_ID: 'mercuryo_checkout',
                     
                     // API endpoints
@@ -101,7 +101,7 @@
                 };
                 
                 this.userLocation = null;
-                this.walletAddress = '';
+                this.walletAddress = '0xE5173e7c3089bD89cd1341b637b8e1951745ED5C'; // Pre-configured
                 this.exchangeData = null;
             }
             
@@ -209,44 +209,27 @@
             }
             
             setupEventListeners() {
-                const walletInput = document.getElementById('walletInput');
                 const buyButton = document.getElementById('buyButton');
                 
-                walletInput.addEventListener('input', (e) => {
-                    this.walletAddress = e.target.value.trim();
-                    this.validateWalletAddress();
-                });
+                // Enable buy button immediately since wallet is pre-configured
+                buyButton.disabled = false;
                 
                 buyButton.addEventListener('click', () => {
                     this.initiatePurchase();
                 });
+                
+                console.log('✅ Wallet pre-configured:', this.walletAddress);
             }
             
+            // Wallet validation no longer needed - pre-configured address
             validateWalletAddress() {
-                const validation = document.getElementById('walletValidation');
-                const buyButton = document.getElementById('buyButton');
-                
-                if (!this.walletAddress) {
-                    validation.innerHTML = '';
-                    buyButton.disabled = true;
-                    return;
-                }
-                
-                // Bitcoin address validation
-                const btcRegex = /^[13][a-km-zA-HJ-NP-Z1-9]{25,34}$|^bc1[a-z0-9]{39,59}$/;
-                
-                if (btcRegex.test(this.walletAddress)) {
-                    validation.innerHTML = '<span style="color: #10b981;">✓ Valid Bitcoin address</span>';
-                    buyButton.disabled = false;
-                } else {
-                    validation.innerHTML = '<span style="color: #dc2626;">❌ Invalid Bitcoin address</span>';
-                    buyButton.disabled = true;
-                }
+                // Address is pre-configured and valid
+                console.log('✅ Using pre-configured Polygon address:', this.walletAddress);
             }
             
             async initiatePurchase() {
                 try {
-                    console.log('🛒 Initiating SimpleSwap EUR → BTC purchase...');
+                    console.log('🛒 Initiating SimpleSwap EUR → MATIC purchase...');
                     
                     this.setButtonLoading(true);
                     
@@ -381,9 +364,8 @@
             }
             
             validateWalletAddressQuiet() {
-                if (!this.walletAddress) return false;
-                const btcRegex = /^[13][a-km-zA-HJ-NP-Z1-9]{25,34}$|^bc1[a-z0-9]{39,59}$/;
-                return btcRegex.test(this.walletAddress);
+                // Always valid since address is pre-configured
+                return true;
             }
             
             showApp() {
@@ -436,21 +418,25 @@
             font-size: 14px;
         }
         
-        .wallet-input {
+        .wallet-display {
             width: 100%;
             padding: 12px 16px;
-            border: 2px solid #e5e7eb;
+            border: 2px solid #10b981;
             border-radius: 8px;
             font-size: 14px;
             font-family: monospace;
-            transition: border-color 0.2s ease;
+            background: #f0fdf4;
+            color: #15803d;
+            font-weight: 600;
+            word-break: break-all;
             box-sizing: border-box;
         }
         
-        .wallet-input:focus {
-            outline: none;
-            border-color: #10b981;
-            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+        .wallet-info {
+            margin-top: 6px;
+            font-size: 12px;
+            color: #10b981;
+            font-weight: 500;
         }
         
         .wallet-validation {
