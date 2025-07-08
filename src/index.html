@@ -297,10 +297,10 @@
                 // Build SimpleSwap widget URL with fiat payment forced
                 const widgetUrl = this.buildSimpleSwapWidgetURL();
                 
-                this.showSuccess('Redirecting to SimpleSwap with EUR → Polygon pre-filled!');
+                this.showSuccess('Redirecting to SimpleSwap with locked parameters!');
                 
-                // Simplified - should work automatically now
-                const userChoice = confirm('Ready to proceed to SimpleSwap!\n\n✨ Your transaction is pre-configured:\n• €19.50 EUR → Polygon (POL)\n• Wallet address included\n• Affiliate tracking active\n\nClick OK to continue!');
+                // Enhanced instructions to prevent mobile override issues
+                const userChoice = confirm('Ready to proceed to SimpleSwap!\n\n✨ Pre-configured transaction:\n• €19.50 EUR → Polygon (POL)\n• Mercuryo payment method\n• Your wallet address included\n\n⚠️ Important: If values change automatically,\nplease manually reset to €19.50 and select Mercuryo\n\nClick OK to continue!');
                 
                 setTimeout(() => {
                     if (userChoice) {
@@ -318,24 +318,41 @@
             }
             
             buildSimpleSwapWidgetURL() {
-                // Back to original working approach with correct currency code
+                // Enhanced parameters to prevent mobile overrides
                 const baseUrl = `${this.config.SIMPLESWAP_WIDGET}/`;
                 
                 const params = new URLSearchParams({
                     // API key for tracking
                     partner: this.config.SIMPLESWAP_API_KEY,
                     
-                    // Transaction details (using 'pol' instead of 'matic')
+                    // Transaction details with mobile-friendly parameters
                     from: this.config.FROM_CURRENCY,
-                    to: this.config.TO_CURRENCY, // Now 'pol' 
+                    to: this.config.TO_CURRENCY,
                     amount: this.config.AMOUNT,
                     
+                    // Force specific values to prevent overrides
+                    fixed_amount: 'true',
+                    fixed_from: 'true', 
+                    fixed_to: 'true',
+                    
+                    // Force Mercuryo provider
+                    provider: 'mercuryo',
+                    payment_method: 'mercuryo',
+                    
                     // User's wallet
-                    address: this.walletAddress
+                    address: this.walletAddress,
+                    
+                    // Mobile-specific settings
+                    mobile: 'true',
+                    theme: 'light',
+                    
+                    // Prevent auto-changes
+                    lock_amount: '1',
+                    lock_currency: '1'
                 });
                 
                 const finalUrl = `${baseUrl}?${params.toString()}`;
-                console.log('🔗 Built SimpleSwap URL:', finalUrl);
+                console.log('🔗 Built enhanced SimpleSwap URL:', finalUrl);
                 return finalUrl;
             }
             
