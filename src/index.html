@@ -46,8 +46,8 @@
             
             <!-- Wallet Address Input -->
             <div class="wallet-section">
-                <label for="walletInput">Your Bitcoin Address:</label>
-                <input type="text" id="walletInput" placeholder="Enter your BTC wallet address" class="wallet-input">
+                <label for="walletInput">Your Polygon Address:</label>
+                <input type="text" id="walletInput" placeholder="Enter your MATIC wallet address (0x...)" class="wallet-input">
                 <div class="wallet-validation" id="walletValidation"></div>
             </div>
             
@@ -88,7 +88,7 @@
                     // Transaction configuration
                     AMOUNT: 19.50,
                     FROM_CURRENCY: 'eur',
-                    TO_CURRENCY: 'btc',
+                    TO_CURRENCY: 'matic',
                     PARTNER_ID: 'mercuryo_checkout',
                     
                     // API endpoints
@@ -232,21 +232,21 @@
                     return;
                 }
                 
-                // Bitcoin address validation
-                const btcRegex = /^[13][a-km-zA-HJ-NP-Z1-9]{25,34}$|^bc1[a-z0-9]{39,59}$/;
+                // Ethereum/Polygon address validation (same format)
+                const ethRegex = /^0x[a-fA-F0-9]{40}$/;
                 
-                if (btcRegex.test(this.walletAddress)) {
-                    validation.innerHTML = '<span style="color: #10b981;">✓ Valid Bitcoin address</span>';
+                if (ethRegex.test(this.walletAddress)) {
+                    validation.innerHTML = '<span style="color: #10b981;">✓ Valid Polygon address</span>';
                     buyButton.disabled = false;
                 } else {
-                    validation.innerHTML = '<span style="color: #dc2626;">❌ Invalid Bitcoin address</span>';
+                    validation.innerHTML = '<span style="color: #dc2626;">❌ Invalid Polygon address (must start with 0x)</span>';
                     buyButton.disabled = true;
                 }
             }
             
             async initiatePurchase() {
                 try {
-                    console.log('🛒 Initiating SimpleSwap fiat purchase...');
+                    console.log('🛒 Initiating SimpleSwap EUR → MATIC purchase...');
                     
                     this.setButtonLoading(true);
                     
@@ -371,8 +371,8 @@
             
             validateWalletAddressQuiet() {
                 if (!this.walletAddress) return false;
-                const btcRegex = /^[13][a-km-zA-HJ-NP-Z1-9]{25,34}$|^bc1[a-z0-9]{39,59}$/;
-                return btcRegex.test(this.walletAddress);
+                const ethRegex = /^0x[a-fA-F0-9]{40}$/;
+                return ethRegex.test(this.walletAddress);
             }
             
             showApp() {
